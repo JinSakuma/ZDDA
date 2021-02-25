@@ -25,7 +25,7 @@ from utils.visualizer import get_feat, show_UMAP_2D
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--method', type=str, default='AlexNet', help='AlexNet or ResNet')
-parser.add_argument('-o', '--output', type=str, default='logs/test_step2_theta1/')
+parser.add_argument('-o', '--output', type=str, default='logs/step2_lambda1_sgd1e-5/')
 parser.add_argument('-e', '--epoch', type=int, default=100)
 parser.add_argument('-g', '--gpuid', type=int, default=0)
 
@@ -42,6 +42,7 @@ torch.manual_seed(seed)
 
 num_epochs = args.epoch
 output_dir = os.path.join(os.getcwd(), args.output)
+weight_dir = output_dir.replace('logs', 'weights')
 method=args.method
 batch_size=16
 theta = 1
@@ -68,8 +69,8 @@ for param in t.parameters():
 
 l2_criterion = nn.MSELoss()
 softmax_criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam([{'params': s2.parameters()},
-                        {'params': classifier2.parameters()}], lr=0.001)
+optimizer = optim.SGD([{'params': s2.parameters()},
+                        {'params': classifier2.parameters()}], lr=1e-5)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 s2.to(device)
@@ -160,7 +161,7 @@ loader_pair_bd_test = PairDataLoader(ds_b_test, ds_d_test, batch_size=1, shuffle
 # Train/Val Model
 ##########################################################################
 os.makedirs(output_dir, exist_ok=True)
-os.makedirs(output_dir+'/weights', exist_ok=True)
+os.makedirs(weight_dir, exist_ok=True)
 os.makedirs(output_dir+'/figures', exist_ok=True)
 os.makedirs(output_dir+'/history', exist_ok=True)
 best_acc = 0
@@ -210,9 +211,9 @@ for epoch in range(num_epochs):
             val_lossBD, val_accBD, acc_sB, acc_tD, loss_sB, loss_tD, l2_lossBD = step2_val(val_steps, s2, t, classifier2, loader_pair_bd_test, softmax_criterion, l2_criterion, device)
             
             # save model
-            torch.save(s2.state_dict(), os.path.join(output_dir, 'weights/step2_s2_epoch{}_acc{:.3f}.pth'.format(epoch, acc_tD)))
-            torch.save(t.state_dict(), os.path.join(output_dir, 'weights/step2_t_epoch{}_acc{:.3f}.pth'.format(epoch, acc_tD)))
-            torch.save(classifier2.state_dict(), os.path.join(output_dir, 'weights/step2_classifier_epoch{}_acc{:.3f}.pth'.format(epoch, acc_tD)))
+            torch.save(s2.state_dict(), os.path.join(weight_dir, 'step2_s2_epoch{}_acc{:.3f}.pth'.format(epoch, acc_tD)))
+            torch.save(t.state_dict(), os.path.join(weight_dir, 'step2_t_epoch{}_acc{:.3f}.pth'.format(epoch, acc_tD)))
+            torch.save(classifier2.state_dict(), os.path.join(weight_dir, 'step2_classifier_epoch{}_acc{:.3f}.pth'.format(epoch, acc_tD)))
             
             # logging
             Acc[phase].append(val_accAC)

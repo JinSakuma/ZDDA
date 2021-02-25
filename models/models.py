@@ -3,8 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
 
-from .arcface import ArcFace
-
 
 class AlexNetCNN(nn.Module):
     def __init__(self, base_model):
@@ -53,42 +51,42 @@ class ResNetClassifier(nn.Module):
         return output 
 
 
-class Net(nn.Module):
-    def __init__(self, cls_num=5):
-        super(Net, self).__init__()
-        self.cls_num = cls_num
-        self.conv1 = nn.Conv2d(3, 32, 3, 1)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.dropout = nn.Dropout2d(0.5)
-        self.fc1 = nn.Linear(64*14*14, 128)
-        self.fc2 = nn.Linear(128, self.cls_num)
+# class Net(nn.Module):
+#     def __init__(self, cls_num=5):
+#         super(Net, self).__init__()
+#         self.cls_num = cls_num
+#         self.conv1 = nn.Conv2d(3, 32, 3, 1)
+#         self.conv2 = nn.Conv2d(32, 64, 3, 1)
+#         self.pool = nn.MaxPool2d(2, 2)
+#         self.dropout = nn.Dropout2d(0.5)
+#         self.fc1 = nn.Linear(64*14*14, 128)
+#         self.fc2 = nn.Linear(128, self.cls_num)
 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = F.relu(x)
-        x = self.conv2(x)
-        x = F.relu(x)
-        x = self.pool(F.relu(x))
-        x = self.dropout(x)
-        x = x.view(-1, 14 * 14 * 64)
-        x = F.relu(self.fc1(x))
-        output = self.fc2(x)
-#         output = F.softmax(x, dim=1)
-#         print(output)
-        return output
+#     def forward(self, x):
+#         x = self.conv1(x)
+#         x = F.relu(x)
+#         x = self.conv2(x)
+#         x = F.relu(x)
+#         x = self.pool(F.relu(x))
+#         x = self.dropout(x)
+#         x = x.view(-1, 14 * 14 * 64)
+#         x = F.relu(self.fc1(x))
+#         output = self.fc2(x)
+# #         output = F.softmax(x, dim=1)
+# #         print(output)
+#         return output
 
-    def get_mid_feat(self, x):
-        x = self.conv1(x)
-        x = F.relu(x)
-        x = self.conv2(x)
-        x = F.relu(x)
-        x = self.pool(F.relu(x))
-        x = self.dropout(x)
-        x = x.view(-1, 14 * 14 * 64)
-        x = F.relu(self.fc1(x))
+#     def get_mid_feat(self, x):
+#         x = self.conv1(x)
+#         x = F.relu(x)
+#         x = self.conv2(x)
+#         x = F.relu(x)
+#         x = self.pool(F.relu(x))
+#         x = self.dropout(x)
+#         x = x.view(-1, 14 * 14 * 64)
+#         x = F.relu(self.fc1(x))
         
-        return x
+#         return x
     
 
 def build_CNN(basemodel_name, pretrained=False):
